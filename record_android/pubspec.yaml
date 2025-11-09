@@ -1,7 +1,7 @@
 name: record_android
 description: Android specific implementation for record package called by record_platform_interface.
 version: 1.4.4
-homepage: https://github.com/llfbandit/record/tree/master/record_android
+homepage: https://github.com/rostislave23/record_none_audiofocus/tree/master/record_android
 
 environment:
   sdk: ^3.5.0

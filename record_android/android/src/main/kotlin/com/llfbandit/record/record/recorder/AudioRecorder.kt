@@ -32,6 +32,8 @@ class AudioRecorder(
   companion object {
     private val TAG = AudioRecorder::class.java.simpleName
     private const val DEFAULT_AMPLITUDE = -160.0
+    // 🔥 ДОДАНО: Флаг для вимкнення AudioFocus
+    private const val DISABLE_AUDIO_FOCUS = true // Встановіть false щоб увімкнути назад
   }
 
   // Recorder thread with which we will interact
@@ -186,7 +188,12 @@ class AudioRecorder(
   private fun assignAudioManagerSettings(config: RecordConfig?) {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    requestAudioFocus(audioManager)
+    // 🔥 ВИПРАВЛЕННЯ: Запитуємо AudioFocus ТІЛЬКИ якщо не вимкнено
+    if (!DISABLE_AUDIO_FOCUS) {
+      requestAudioFocus(audioManager)
+    } else {
+      Log.i(TAG, "AudioFocus DISABLED - recording without requesting audio focus")
+    }
 
     val conf = config ?: return
 
@@ -206,7 +213,10 @@ class AudioRecorder(
   private fun restoreAudioManagerSettings() {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    abandonAudioFocus(audioManager)
+    // 🔥 ВИПРАВЛЕННЯ: Відпускаємо AudioFocus ТІЛЬКИ якщо запитували
+    if (!DISABLE_AUDIO_FOCUS) {
+      abandonAudioFocus(audioManager)
+    }
 
     val conf = config ?: return
 
@@ -233,7 +243,14 @@ class AudioRecorder(
 
   @Suppress("DEPRECATION")
   private fun requestAudioFocus(audioManager: AudioManager) {
+    // 🔥 ВИПРАВЛЕННЯ: Змінено логіку - НЕ зупиняємо запис при втраті фокусу
     afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+      Log.i(TAG, "AudioFocus change: $focusChange")
+      
+      // ВАЖЛИВО: Закоментовано всю логіку паузи/відновлення
+      // Це дозволяє записувати навіть коли інші додатки відтворюють аудіо
+      
+      /*
       if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
         if (config!!.audioInterruption != AudioInterruption.NONE) {
           recorderThread?.pauseRecording()
@@ -243,15 +260,19 @@ class AudioRecorder(
           recorderThread?.resumeRecording()
         }
       }
+      */
     }
 
     if (Build.VERSION.SDK_INT >= 26) {
-      afRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+      afRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).run {
         setAudioAttributes(AudioAttributes.Builder().run {
           setUsage(AudioAttributes.USAGE_MEDIA)
           setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
           build()
         })
+        // 🔥 ДОДАНО: Не паузуємо при ducking
+        setWillPauseWhenDucked(false)
+        setAcceptsDelayedFocusGain(false)
         setOnAudioFocusChangeListener(afChangeListener!!, Handler(Looper.getMainLooper()))
         build()
       }
@@ -259,7 +280,7 @@ class AudioRecorder(
       audioManager.requestAudioFocus(afRequest!!)
     } else {
       audioManager.requestAudioFocus(
-        afChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN
+        afChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
       )
     }
   }

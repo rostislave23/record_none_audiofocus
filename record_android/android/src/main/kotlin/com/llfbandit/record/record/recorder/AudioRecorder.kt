@@ -60,8 +60,6 @@ class AudioRecorder(
   private var amPrevAudioMode: Int = AudioManager.MODE_NORMAL
   private var amPrevSpeakerphone = false
 
-  private var afChangeListener: AudioManager.OnAudioFocusChangeListener? = null
-  private var afRequest: AudioFocusRequest? = null
 
   init {
     saveAudioManagerSettings()
@@ -186,7 +184,7 @@ class AudioRecorder(
   private fun assignAudioManagerSettings(config: RecordConfig?) {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    requestAudioFocus(audioManager)
+    //requestAudioFocus(audioManager)
 
     val conf = config ?: return
 
@@ -206,7 +204,7 @@ class AudioRecorder(
   private fun restoreAudioManagerSettings() {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    abandonAudioFocus(audioManager)
+    //abandonAudioFocus(audioManager)
 
     val conf = config ?: return
 
@@ -233,48 +231,11 @@ class AudioRecorder(
 
   @Suppress("DEPRECATION")
   private fun requestAudioFocus(audioManager: AudioManager) {
-    afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
-      if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-        if (config!!.audioInterruption != AudioInterruption.NONE) {
-          recorderThread?.pauseRecording()
-        }
-      } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-        if (config!!.audioInterruption == AudioInterruption.PAUSE_RESUME) {
-          recorderThread?.resumeRecording()
-        }
-      }
-    }
-
-    if (Build.VERSION.SDK_INT >= 26) {
-      afRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-        setAudioAttributes(AudioAttributes.Builder().run {
-          setUsage(AudioAttributes.USAGE_MEDIA)
-          setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-          build()
-        })
-        setOnAudioFocusChangeListener(afChangeListener!!, Handler(Looper.getMainLooper()))
-        build()
-      }
-
-      audioManager.requestAudioFocus(afRequest!!)
-    } else {
-      audioManager.requestAudioFocus(
-        afChangeListener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN
-      )
-    }
+    // Disabled: do not request audio focus
   }
 
   @Suppress("DEPRECATION")
   private fun abandonAudioFocus(audioManager: AudioManager) {
-    if (Build.VERSION.SDK_INT >= 26) {
-      if (afRequest != null) {
-        audioManager.abandonAudioFocusRequest(afRequest!!)
-        afRequest = null
-      }
-    } else if (afChangeListener != null) {
-      audioManager.abandonAudioFocus(afChangeListener)
-    }
-
-    afChangeListener = null
+    // Disabled: do not abandon audio focus
   }
 }

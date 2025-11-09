@@ -13,7 +13,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  record_platform_interface: ^1.4.0
+  record_platform_interface:
+    git:
+      url: https://github.com/rostislave23/record_none_audiofocus
+      path: record_platform_interface
 
 flutter:
   plugin:

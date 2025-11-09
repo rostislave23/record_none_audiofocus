@@ -1,10 +1,10 @@
 package com.llfbandit.record.record.recorder
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
+// Видалено: import android.media.AudioAttributes
+// Видалено: import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.os.Build
+// Видалено: import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -33,6 +33,11 @@ class AudioRecorder(
     private val TAG = AudioRecorder::class.java.simpleName
     private const val DEFAULT_AMPLITUDE = -160.0
   }
+  
+  // !!! ВИДАЛЕНО: Властивість audioFocusChangeListener !!!
+  // private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> 
+  //   ...
+  // }
 
   // Recorder thread with which we will interact
   private var recorderThread: RecordThread? = null
@@ -184,7 +189,7 @@ class AudioRecorder(
   private fun assignAudioManagerSettings(config: RecordConfig?) {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    // requestAudioFocus(audioManager) // ВИДАЛЕНО: ми не просимо фокус
+    // ВИДАЛЕНО: requestAudioFocus(audioManager)
 
     val conf = config ?: return
 
@@ -204,7 +209,7 @@ class AudioRecorder(
   private fun restoreAudioManagerSettings() {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    // abandonAudioFocus(audioManager) // ВИДАЛЕНО: ми не відмовляємося від фокусу
+    // ВИДАЛЕНО: abandonAudioFocus(audioManager)
 
     val conf = config ?: return
 
@@ -228,4 +233,14 @@ class AudioRecorder(
       audioManager.setStreamVolume(stream, volumeLevel, 0)
     }
   }
+  
+  // !!! ВИДАЛЕНО: requestAudioFocus функція !!!
+  // private fun requestAudioFocus(audioManager: AudioManager) {
+  //   ...
+  // }
+  
+  // !!! ВИДАЛЕНО: abandonAudioFocus функція !!!
+  // private fun abandonAudioFocus(audioManager: AudioManager) {
+  //   ...
+  // }
 }

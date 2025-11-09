@@ -184,7 +184,7 @@ class AudioRecorder(
   private fun assignAudioManagerSettings(config: RecordConfig?) {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    //requestAudioFocus(audioManager)
+    // requestAudioFocus(audioManager) // ВИДАЛЕНО: ми не просимо фокус
 
     val conf = config ?: return
 
@@ -204,7 +204,7 @@ class AudioRecorder(
   private fun restoreAudioManagerSettings() {
     val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    //abandonAudioFocus(audioManager)
+    // abandonAudioFocus(audioManager) // ВИДАЛЕНО: ми не відмовляємося від фокусу
 
     val conf = config ?: return
 
@@ -227,15 +227,5 @@ class AudioRecorder(
       val volumeLevel = if (mute) muteValue else (amPrevMuteSettings[stream] ?: unmuteValue)
       audioManager.setStreamVolume(stream, volumeLevel, 0)
     }
-  }
-
-  @Suppress("DEPRECATION")
-  private fun requestAudioFocus(audioManager: AudioManager) {
-    // Disabled: do not request audio focus
-  }
-
-  @Suppress("DEPRECATION")
-  private fun abandonAudioFocus(audioManager: AudioManager) {
-    // Disabled: do not abandon audio focus
   }
 }
